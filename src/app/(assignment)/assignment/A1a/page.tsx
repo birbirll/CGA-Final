@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 import vertexShader from '@/shaders/common/vertex.glsl';
-import fragmentShader from './fragment.glsl';
+import fragmentShader from './fragment_water.glsl';
 import useDevicePixelRatio from '@/hooks/useDevicePixelRatio';
 
 const Test = () => {

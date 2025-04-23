@@ -1,8 +1,3 @@
-/////////////////////////////////////////////////////
-//// CS 8803/4803 CGAI: Computer Graphics in AI Era
-//// Assignment 1A: SDF and Ray Marching
-/////////////////////////////////////////////////////
-
 precision highp float;              //// set default precision of float variables to high precision
 
 varying vec2 vUv;                   //// screen uv coordinates (varying, from vertex shader)
@@ -12,41 +7,24 @@ uniform float iTime;                //// time elapsed (uniform, from CPU)
 const vec3 CAM_POS = vec3(-0.35, 1.0, -3.0); //// camera position
 
 
-// Global variables
+// Data structure to store current object hit
 struct HitID {
     float dist;
     int id;
 };
 HitID hit_id = HitID(2000.0, -1);
 
-/////////////////////////////////////////////////////
-//// sdf functions
-/////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////
-//// Step 1: sdf primitives
-//// You are asked to implement sdf primitive functions for sphere, plane, and box.
-//// In each function, you will calculate the sdf value based on the function arguments.
-/////////////////////////////////////////////////////
 
 //// sphere: p - query point; c - sphere center; r - sphere radius
 float sdfSphere(vec3 p, vec3 c, float r)
 {
-    //// your implementation starts
-    
     return length(p - c) - r;
-    
-    //// your implementation ends
 }
 
 //// plane: p - query point; h - height
 float sdfPlane(vec3 p, float h)
 {
-    //// your implementation starts
-    
     return p.y - h;
-    
-    //// your implementation ends
 }
 
 //// box: p - query point; c - box center; b - box half size (i.e., the box size is (2*b.x, 2*b.y, 2*b.z))
@@ -60,240 +38,26 @@ float sdfBox(vec3 p, vec3 c, vec3 b)
     //// your implementation ends
 }
 
-/////////////////////////////////////////////////////
-//// boolean operations
-/////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////
-//// Step 2: sdf boolean operations
-//// You are asked to implement sdf boolean operations for intersection, union, and subtraction.
-/////////////////////////////////////////////////////
 
 float sdfIntersection(float s1, float s2)
 {
-    //// your implementation starts
-    
     return max(s1, s2);
-
-    //// your implementation ends
 }
 
 float sdfUnion(float s1, float s2)
 {
-    //// your implementation starts
-    
     return min(s1, s2);
-
-    //// your implementation ends
 }
 
 float sdfSubtraction(float s1, float s2)
 {
-    //// your implementation starts
-    
     return max(s1, -s2);
-
-    //// your implementation ends
-}
-
-/////////////////////////////////////////////////////
-//// sdf calculation
-/////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////
-//// Step 3: scene sdf
-//// You are asked to use the implemented sdf boolean operations to draw the following objects in the scene by calculating their CSG operations.
-/////////////////////////////////////////////////////
-
-
-//// sdf: p - query point
-float sdf(vec3 p)
-{
-    float s = 0.;
-
-    //// 1st object: plane
-    float plane1_h = -0.1;
-    
-    //// 2nd object: sphere
-    vec3 sphere1_c = vec3(-2.0, 1.0, 0.0);
-    float sphere1_r = 0.25;
-
-    //// 3rd object: box
-    vec3 box1_c = vec3(-1.0, 1.0, 0.0);
-    vec3 box1_b = vec3(0.2, 0.2, 0.2);
-
-    //// 4th object: box-sphere subtraction
-    vec3 box2_c = vec3(0.0, 1.0, 0.0);
-    vec3 box2_b = vec3(0.3, 0.3, 0.3);
-
-    vec3 sphere2_c = vec3(0.0, 1.0, 0.0);
-    float sphere2_r = 0.4;
-
-    //// 5th object: sphere-sphere intersection
-    vec3 sphere3_c = vec3(1.0, 1.0, 0.0);
-    float sphere3_r = 0.4;
-
-    vec3 sphere4_c = vec3(1.3, 1.0, 0.0);
-    float sphere4_r = 0.3;
-
-    //// calculate the sdf based on all objects in the scene
-    
-    //// your implementation starts
-
-    // Calculate the SDF for each 5 objects
-    float s1 = sdfPlane(p, plane1_h);
-
-    float s2 = sdfSphere(p, sphere1_c, sphere1_r);
-
-    float s3 = sdfBox(p, box1_c, box1_b);
-
-    float s4_1 = sdfBox(p, box2_c, box2_b);
-    float s4_2 = sdfSphere(p, sphere2_c, sphere2_r);
-    float s4 = sdfSubtraction(s4_1, s4_2);
-
-    float s5_1 = sdfSphere(p, sphere3_c, sphere3_r);
-    float s5_2 = sdfSphere(p, sphere4_c, sphere4_r);
-    float s5 = sdfIntersection(s5_1, s5_2);
-
-    // Combine the SDF for all objects
-    float objects[] = float[](
-        s1, 
-        s2, 
-        s3, 
-        s4, 
-        s5);
-    int object_ids[] = int[](
-        1, 
-        2, 
-        3, 
-        4, 
-        5);
-    s = 1000.0; // set a large initial distance for union
-    for (int i = 0; i < objects.length(); i++) {
-        s = sdfUnion(s, objects[i]);
-        if (s < hit_id.dist) {
-            hit_id.dist = s;
-            hit_id.id = object_ids[i]; // Record object hit
-        } 
-    }
-
-
-    //// your implementation ends
-
-    return s;
 }
 
 
-/////////////////////////////////////////////////////
-//// ray marching
-/////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////////
-//// Step 4: ray marching
-//// You are asked to implement the ray marching algorithm within the following for-loop.
-/////////////////////////////////////////////////////
 
-//// ray marching: origin - ray origin; dir - ray direction 
-float rayMarching(vec3 origin, vec3 dir)
-{
-    float s = 0.0; // distance
-    for(int i = 0; i < 100; i++)
-    {
-        //// your implementation starts
-        vec3 p = origin + dir * s;
-        float dist = sdf(p); // sdf value in p
-        s += dist; // update the distance
-        if (s > 100.0 || dist < 0.001) {
-            break;
-        }
-        //// your implementation ends
-    }
-    
-    return s;
-}
 
-/////////////////////////////////////////////////////
-//// normal calculation
-/////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////
-//// Step 5: normal calculation
-//// You are asked to calculate the sdf normal based on finite difference.
-/////////////////////////////////////////////////////
-
-//// normal: p - query point
-vec3 normal(vec3 p)
-{
-    float s = sdf(p);          //// sdf value in p
-    float dx = 0.01;           //// step size for finite difference
-
-    //// your implementation starts
-    
-    return normalize(vec3(
-        sdf(p + vec3(dx, 0.0, 0.0)) - sdf(p - vec3(dx, 0.0, 0.0)), // dsx
-        sdf(p + vec3(0.0, dx, 0.0)) - sdf(p - vec3(0.0, dx, 0.0)), // dsy
-        sdf(p + vec3(0.0, 0.0, dx)) - sdf(p - vec3(0.0, 0.0, dx))  // dsz
-    ));
-
-    // your implementation ends
-}
-
-/////////////////////////////////////////////////////
-//// Phong shading
-/////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////
-//// Step 6: lighting and coloring
-//// You are asked to specify the color for each object in the scene.
-//// Each object must have a separate color without mixing.
-//// Notice that we have implemented the default Phong shading model for you.
-/////////////////////////////////////////////////////
-
-vec3 phong_shading(vec3 p, vec3 n)
-{
-    //// background
-    if(p.z > 10.0){
-        return vec3(0.9, 0.6, 0.2);
-    }
-
-    //// phong shading
-    vec3 lightPos = vec3(4.*sin(iTime), 4., 4.*cos(iTime));  
-    vec3 l = normalize(lightPos - p);               
-    float amb = 0.1;
-    float dif = max(dot(n, l), 0.) * 0.7;
-    vec3 eye = CAM_POS;
-    float spec = pow(max(dot(reflect(-l, n), normalize(eye - p)), 0.0), 128.0) * 0.9;
-
-    vec3 sunDir = vec3(0, 1, -1);
-    float sunDif = max(dot(n, sunDir), 0.) * 0.2;
-
-    //// your implementation for coloring starts
-    vec3 color = vec3(1.0, 1.0, 1.0);
-    if (hit_id.id == 1) {
-        color = vec3(0.13, 0.72, 0.0);
-    } else if (hit_id.id == 2) {
-        color = vec3(1.0, 0.0, 0.0);
-    } else if (hit_id.id == 3) {
-        color = vec3(0.65, 1.0, 0.0);
-    } else if (hit_id.id == 4) {
-        color = vec3(0.5, 0.0, 1.0);
-    } else if (hit_id.id == 5) {
-        color = vec3(0.0, 0.52, 1.0);
-    }
-    //// your implementation for coloring ends
-
-    //// shadow
-    float s = rayMarching(p + n * 0.02, l);
-    if(s < length(lightPos - p)) dif *= .2; // shadow
-
-    return (amb + dif + spec + sunDif) * color;
-}
-
-/////////////////////////////////////////////////////
-//// Step 7: creative expression
-//// You will create your customized sdf scene with new primitives and CSG operations in the sdf2 function.
-//// Call sdf2 in your ray marching function to render your customized scene.
-/////////////////////////////////////////////////////
 
 /**
  * Return a float value between 0.0(0s) and 1.0(10s) that represents a 10s cycle
@@ -481,14 +245,15 @@ float sdf2(vec3 p, bool record_hit)
     float sun_move = getSyncedTimeCycle() * 3.0;
     float sun = sdfSphere(p, vec3(1.0, sun_move, 50.0), 2.5);
     
-    float cloud_move = 0.2 * sin(iTime / 1.0);
-    float cloud1 = sdfCloud(p, vec3(-10.0, 10.0, 20.0) + vec3(0.0, cloud_move, 0.0));
-    float cloud2 = sdfCloud(p, vec3(-15.0, 4.0, 15.0) + vec3(0.0, -cloud_move, 0.0));
-    float cloud3 = sdfCloud(p, vec3(12.0, 5.0, 17.0) + vec3(0.0, cloud_move, 0.0));
-    float cloud4 = sdfCloud(p, vec3(3.0, 10.0, 20.0) + vec3(0.0, -cloud_move, 0.0));
-    float cloud5 = sdfCloud(p, vec3(8.0, 3.0, 15.0) + vec3(0.0, cloud_move, 0.0));
-    float cloud6 = sdfCloud(p, vec3(10.0, 7.0, 30.0) + vec3(0.0, -cloud_move, 0.0));
-    float cloud7 = sdfCloud(p, vec3(-3.0, 8.0, 40.0) + vec3(0.0, cloud_move, 0.0));
+    // float cloud_move = 0.2 * sin(iTime / 1.0);
+    // float cloud1 = sdfCloud(p, vec3(-10.0, 10.0, 20.0) + vec3(0.0, cloud_move, 0.0));
+    // float cloud2 = sdfCloud(p, vec3(-15.0, 4.0, 15.0) + vec3(0.0, -cloud_move, 0.0));
+    // float cloud3 = sdfCloud(p, vec3(12.0, 5.0, 17.0) + vec3(0.0, cloud_move, 0.0));
+    // float cloud4 = sdfCloud(p, vec3(3.0, 10.0, 20.0) + vec3(0.0, -cloud_move, 0.0));
+    // float cloud5 = sdfCloud(p, vec3(8.0, 3.0, 15.0) + vec3(0.0, cloud_move, 0.0));
+    // float cloud6 = sdfCloud(p, vec3(10.0, 7.0, 30.0) + vec3(0.0, -cloud_move, 0.0));
+    // float cloud7 = sdfCloud(p, vec3(-3.0, 8.0, 40.0) + vec3(0.0, cloud_move, 0.0));
+    float cloud = sdfCloud(p, vec3(-10.0, 10.0, 20.0) + vec3(0.0, sun_move * 0.5, 0.0));
 
     // Combine the SDF for all objects
     float objects[] = float[](
@@ -498,7 +263,7 @@ float sdf2(vec3 p, bool record_hit)
         birb3,
         background,
         sun,
-        cloud1, cloud2, cloud3, cloud4, cloud5, cloud6, cloud7,
+        cloud,
         riverbody
     );
     // Assign object ids for coloring
@@ -509,7 +274,7 @@ float sdf2(vec3 p, bool record_hit)
         4,
         5,
         6,
-        7, 7, 7, 7, 7, 7, 7,
+        7,
         8
     );
     s = 1000.0; // set a large initial distance for union
@@ -553,6 +318,126 @@ float rayMarching2(vec3 origin, vec3 dir)
     
     return s;
 }
+
+// Cloud shader
+mat3 m = mat3( 0.00,  0.80,  0.60,
+            -0.80,  0.36, -0.48,
+            -0.60, -0.48,  0.64 );
+float hash( float n )
+{
+    return fract(sin(n)*43758.5453);
+}
+
+float noise( in vec3 x )
+{
+    vec3 p = floor(x);
+    vec3 f = fract(x);
+
+    f = f*f*(3.0-2.0*f);
+
+    float n = p.x + p.y*57.0 + 113.0*p.z;
+
+    float res = mix(mix(mix( hash(n+  0.0), hash(n+  1.0),f.x),
+                        mix( hash(n+ 57.0), hash(n+ 58.0),f.x),f.y),
+                    mix(mix( hash(n+113.0), hash(n+114.0),f.x),
+                        mix( hash(n+170.0), hash(n+171.0),f.x),f.y),f.z);
+    return res;
+}
+
+float fbm( vec3 p )
+{
+    float f;
+    f  = 0.5000*noise( p ); p = m*p*2.02;
+    f += 0.2500*noise( p ); p = m*p*2.03;
+    f += 0.12500*noise( p ); p = m*p*2.01;
+    f += 0.06250*noise( p );
+    return f;
+}
+/////////////////////////////////////
+
+
+// iq's smin
+float smin( float d1, float d2, float k ) {
+    float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
+    return mix( d2, d1, h ) - k*h*(1.0-h); }
+
+float sdTorus( vec3 p, vec2 t )
+{
+vec2 q = vec2(length(p.xz)-t.x,p.y);
+return length(q)-t.y;
+}
+
+
+float map( in vec3 p )
+{
+    p -= vec3(0.0, 5.0, 10.0);
+    p *= 3.0;
+    vec3 q = p - vec3(0.0,0.5,1.0)*iTime;
+    float f = fbm(q);
+    float torus = 1. - sdTorus(p * 2.0, vec2(6.0, 0.005)) + f * 3.5;
+
+    return min(max(0.0, torus), 1.0);
+}
+
+float jitter;
+
+#define MAX_STEPS 48
+#define SHADOW_STEPS 8
+#define VOLUME_LENGTH 15.
+#define SHADOW_LENGTH 2.
+
+// Reference
+// https://shaderbits.com/blog/creating-volumetric-ray-marcher
+vec4 cloudMarch(vec3 p, vec3 ray)
+{
+    float density = 0.;
+
+    float stepLength = VOLUME_LENGTH / float(MAX_STEPS);
+    float shadowStepLength = SHADOW_LENGTH / float(SHADOW_STEPS);
+    // vec3 light = normalize(vec3(1.0, 2.0, 1.0));
+    vec3 light = normalize(vec3(1.0));
+
+    vec4 sum = vec4(0., 0., 0., 1.);
+    
+    vec3 pos = p + ray * jitter * stepLength;
+    
+    for (int i = 0; i < MAX_STEPS; i++)
+    {
+        if (sum.a < 0.1) {
+            break;
+        }
+        float d = map(pos);
+    
+        if( d > 0.001)
+        {
+            vec3 lpos = pos + light * jitter * shadowStepLength;
+            float shadow = 0.;
+    
+            for (int s = 0; s < SHADOW_STEPS; s++)
+            {
+                lpos += light * shadowStepLength;
+                float lsample = map(lpos);
+                shadow += lsample;
+            }
+    
+            density = clamp((d / float(MAX_STEPS)) * 20.0, 0.0, 1.0);
+            float s = exp((-shadow / float(SHADOW_STEPS)) * 3.);
+            sum.rgb += vec3(s * density) * sum.a;
+            sum.a *= 1.-density;
+
+            vec3 sky_color = vec3(1.0, 0.64, 0.83);
+            sum.rgb += exp(-map(pos + vec3(0,0.25,0.0)) * .2) 
+                        * density * sky_color * sum.a;
+        }
+        pos += ray * stepLength;
+    }
+
+    return sum;
+}
+
+
+
+
 
 /**
  * Normal calculation for SDF2 Scene
@@ -669,6 +554,8 @@ vec3 phong_shading2(vec3 p, vec3 n, vec3 ray_dir, vec3 origin)
     vec3 sunDir = vec3(0, 1, -1);
     float sunDif = max(dot(n, sunDir), 0.) * 0.2;
 
+
+
     //// Coloring
     float birb_brightness = 1.2;
     vec3 color = vec3(1.0, 1.0, 1.0);
@@ -690,6 +577,10 @@ vec3 phong_shading2(vec3 p, vec3 n, vec3 ray_dir, vec3 origin)
             vec3 color1 = vec3(0.77, 0.67, 0.53);
             vec3 color2 = vec3(1.0, 0.25, 0.98);
             color = mix(color1, color2, (p.y + 5.0) / 100.0) * brightness_scale;
+
+            //// Cloud marching
+            vec4 cloud_color = cloudMarch(origin, ray_dir);
+            color = cloud_color.rgb + color * cloud_color.a; // Add cloud color to the scene
             return color;
         case 6: // Sun
             color = vec3(1.0, 0.29, 0.09);
@@ -723,6 +614,10 @@ vec3 phong_shading2(vec3 p, vec3 n, vec3 ray_dir, vec3 origin)
     color = mix(color, fog_color, fog);
 
     return (amb + dif + spec + sunDif) * brightness_scale * color * light_color;
+
+    // vec3 scene_color = (amb + dif + spec + sunDif) * brightness_scale * color * light_color;
+
+    // return cloud_color.rgb + scene_color * cloud_color.a; // Add cloud color to the scene
 }
 
 
@@ -741,33 +636,32 @@ void mainImage2(out vec4 fragColor, in vec2 fragCoord)
                           + vec3(0.0, cam_move * 0.3, -cam_move * 2.0);          //// camera position 
     // vec3 origin = CAM_POS;                                                 //// camera position
     vec3 dir = normalize(vec3(uv.x, uv.y, 1));                  //// camera direction
-    float s = rayMarching2(origin, dir);                         //// ray marching
+    float s = rayMarching2(origin, dir);                     //// ray marching
     vec3 p = origin + dir * s;                                               //// ray-sdf intersection
-    vec3 n = normal2(p);                                                  //// sdf normal
+    vec3 n = normal2(p);                                         //// sdf normal
+    
+    // // if objectID is cloud, use cloud marching
+    // if (hit_id.id == 7) {
+    //     fragColor = vec4(1.0, 1.0, 1.0, 1.0); // White for cloud
+    //     return;
+    // }
+
+    jitter = 1.0;
+
+
+    // //// Cloud marching
+    // vec4 cloud_color = cloudMarch(origin, dir);
+    
     vec3 color = phong_shading2(p, n, dir, origin);    //// phong shading
+
+    // color = cloud_color.rgb + color * cloud_color.a; // Add cloud color to the scene
+    
     fragColor = vec4(color, 1.);                                     //// fragment color
 }
 
-
-void mainImage1(out vec4 fragColor, in vec2 fragCoord)
-{
-    vec2 uv = (fragCoord.xy - .5 * iResolution.xy) / iResolution.y;           //// screen uv
-
-    vec3 origin = CAM_POS;                                                 //// camera position
-    vec3 dir = normalize(vec3(uv.x, uv.y, 1));                  //// camera direction
-    float s = rayMarching(origin, dir);                         //// ray marching
-    vec3 p = origin + dir * s;                                               //// ray-sdf intersection
-    vec3 n = normal(p);                                                  //// sdf normal
-    vec3 color = phong_shading(p, n);    //// phong shading
-    fragColor = vec4(color, 1.);                                     //// fragment color
-}
 
 
 void main() 
 {
-    ////--- Uncomment the following line to render the Base SDF1 scene ---////
-    // mainImage1(gl_FragColor, gl_FragCoord.xy);
-
-    ////--- Uncomment the following line to render the Custom SDF2 scene ---////
     mainImage2(gl_FragColor, gl_FragCoord.xy);
 }

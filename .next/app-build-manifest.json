@@ -40,6 +40,16 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(assignment)/assignment/A2a_doc/page.js"
+    ],
+    "/(tutorial)/tutorial/shader-basis/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(tutorial)/tutorial/shader-basis/page.js"
+    ],
+    "/(tutorial)/tutorial/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(tutorial)/tutorial/layout.js"
     ]
   }
 }

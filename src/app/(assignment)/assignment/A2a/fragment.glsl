@@ -44,12 +44,6 @@ float fbm( vec3 p )
 }
 /////////////////////////////////////
 
-float stepUp(float t, float len, float smo)
-{
-  float tt = mod(t += smo, len);
-  float stp = floor(t / len) - 1.0;
-  return smoothstep(0.0, smo, tt) + stp;
-}
 
 // iq's smin
 float smin( float d1, float d2, float k ) {
@@ -65,24 +59,12 @@ float sdTorus( vec3 p, vec2 t )
 
 float map( in vec3 p )
 {
+    p *= 2.0;
 	vec3 q = p - vec3(0.0,0.5,1.0)*iTime;
     float f = fbm(q);
-    float s1 = 1.0 - length(p * vec3(0.5, 1.0, 0.5)) + f * 2.2;
-    float s2 = 1.0 - length(p * vec3(0.1, 1.0, 0.2)) + f * 2.5;
     float torus = 1. - sdTorus(p * 2.0, vec2(6.0, 0.005)) + f * 3.5;
-    float s3 = 1.0 - smin(smin(
-                           length(p * 1.0 - vec3(cos(iTime * 3.0) * 6.0, sin(iTime * 2.0) * 5.0, 0.0)),
-                           length(p * 2.0 - vec3(0.0, sin(iTime) * 4.0, cos(iTime * 2.0) * 3.0)), 4.0),
-                           length(p * 3.0 - vec3(cos(iTime * 2.0) * 3.0, 0.0, sin(iTime * 3.3) * 7.0)), 4.0) + f * 2.5;
-    
-    float t = mod(stepUp(iTime, 4.0, 1.0), 4.0);
-    
-	float d = mix(s1, s2, clamp(t, 0.0, 1.0));
-    d = mix(d, torus, clamp(t - 1.0, 0.0, 1.0));
-    d = mix(d, s3, clamp(t - 2.0, 0.0, 1.0));
-    d = mix(d, s1, clamp(t - 3.0, 0.0, 1.0));
-    
-	return min(max(0.0, d), 1.0);
+
+	return min(max(0.0, torus), 1.0);
 }
 
 float jitter;
