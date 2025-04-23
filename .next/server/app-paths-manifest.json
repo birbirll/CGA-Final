@@ -1,5 +1,7 @@
 {
-  "/page": "app/page.js",
   "/(assignment)/assignment/A1a/page": "app/(assignment)/assignment/A1a/page.js",
-  "/(assignment)/assignment/A4/page": "app/(assignment)/assignment/A4/page.js"
+  "/(assignment)/assignment/A4/page": "app/(assignment)/assignment/A4/page.js",
+  "/(assignment)/assignment/A1a_doc/page": "app/(assignment)/assignment/A1a_doc/page.js",
+  "/(assignment)/assignment/A2a/page": "app/(assignment)/assignment/A2a/page.js",
+  "/(assignment)/assignment/A2a_doc/page": "app/(assignment)/assignment/A2a_doc/page.js"
 }

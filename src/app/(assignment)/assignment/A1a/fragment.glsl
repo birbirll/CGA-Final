@@ -471,9 +471,9 @@ float sdf2(vec3 p, bool record_hit)
 
 
     float birb_move = 0.03 * sin(iTime / 2.0);
-    float brib1 = sdfBorb(p, vec3(0.5, -0.4 - 0.2 + birb_move, -0.65 + 1.), -80.0, true);
-    float brib2 = sdfBorb(p, vec3(-0.2, -0.3 - 0.2 + birb_move, 0.0 + 1.), 160.0, true);
-    float brib3 = sdfBorb(p, vec3(0.6, -0.3 - 0.2 + birb_move, 0.5 + 1.), 40.0 , true);
+    float birb1 = sdfBorb(p, vec3(0.5, -0.4 - 0.2 + birb_move, -0.65 + 1.), -80.0, true);
+    float birb2 = sdfBorb(p, vec3(-0.2, -0.3 - 0.2 + birb_move, 0.0 + 1.), 160.0, true);
+    float birb3 = sdfBorb(p, vec3(0.6, -0.3 - 0.2 + birb_move, 0.5 + 1.), 40.0 , true);
 
     float background = sdfBox(p, vec3(0.0, 0.0, 50.0), vec3(100.0, 100.0, 1.0));
 
@@ -493,9 +493,9 @@ float sdf2(vec3 p, bool record_hit)
     // Combine the SDF for all objects
     float objects[] = float[](
         ground,
-        brib1,
-        brib2, 
-        brib3,
+        birb1,
+        birb2, 
+        birb3,
         background,
         sun,
         cloud1, cloud2, cloud3, cloud4, cloud5, cloud6, cloud7,

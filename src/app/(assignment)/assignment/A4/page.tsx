@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 import vertexShader from '@/shaders/common/vertex.glsl'; // Simple vertex shader
-import fragmentShader from './fragment_ce.glsl'; // Fragment shader
+import fragmentShader from './fragment_final.glsl'; // Fragment shader
 
 const XPBDRope = ({ dpr }: { dpr: number }) => {
   const { viewport, gl, scene, camera } = useThree();

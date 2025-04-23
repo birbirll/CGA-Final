@@ -1,175 +1,173 @@
-
-/////////////////////////////////////////////////////
-//// CS 8803/4803 CGAI: Computer Graphics in AI Era
-//// Assignment 2A: Volumetric Ray Tracing
-/////////////////////////////////////////////////////
-
 precision highp float;              //// set default precision of float variables to high precision
 
 varying vec2 vUv;                   //// screen uv coordinates (varying, from vertex shader)
 uniform vec2 iResolution;           //// screen resolution (uniform, from CPU)
 uniform float iTime;                //// time elapsed (uniform, from CPU)
-uniform highp sampler3D iVolume;    //// volume texture
 
-/////////////////////////////////////////////////////
-//// camera initialization
-/////////////////////////////////////////////////////
 
-//// set camera: ro - camera position, ta - camera lookat, cr - camera rotation angle
-mat3 setCamera(in vec3 ro, in vec3 ta, float cr)
+
+// noise
+// Volume raycasting by XT95
+// https://www.shadertoy.com/view/lss3zr
+mat3 m = mat3( 0.00,  0.80,  0.60,
+              -0.80,  0.36, -0.48,
+              -0.60, -0.48,  0.64 );
+float hash( float n )
 {
-	vec3 cw = normalize(ta-ro);
-	vec3 cp = vec3(sin(cr), cos(cr),0.0);
-	vec3 cu = normalize(cross(cw,cp));
-	vec3 cv = cross(cu,cw);
-    return mat3(cu, cv, cw);
+    return fract(sin(n)*43758.5453);
 }
 
-/////////////////////////////////////////////////////
-//// density-to-color conversion
-/////////////////////////////////////////////////////
-
-//// Inigo Quilez - https://iquilezles.org/articles/palettes/
-//// This function converts a scalar value t to a color
-vec3 palette(in float t) 
+float noise( in vec3 x )
 {
-  vec3 a = vec3(0.5, 0.5, 0.5);
-  vec3 b = vec3(0.5, 0.5, 0.5);
-  vec3 c = vec3(1.0, 1.0, 1.0);
-  vec3 d = vec3(0.0, 0.10, 0.20);
+    vec3 p = floor(x);
+    vec3 f = fract(x);
 
-  return a + b * cos(6.28318 * (c * t + d));
+    f = f*f*(3.0-2.0*f);
+
+    float n = p.x + p.y*57.0 + 113.0*p.z;
+
+    float res = mix(mix(mix( hash(n+  0.0), hash(n+  1.0),f.x),
+                        mix( hash(n+ 57.0), hash(n+ 58.0),f.x),f.y),
+                    mix(mix( hash(n+113.0), hash(n+114.0),f.x),
+                        mix( hash(n+170.0), hash(n+171.0),f.x),f.y),f.z);
+    return res;
 }
 
-/////////////////////////////////////////////////////
-//// sdf definitions
-/////////////////////////////////////////////////////
-
-//// sdf sphere
-float sdSphere(vec3 p, float s)
+float fbm( vec3 p )
 {
-    return length(p)-s;
+    float f;
+    f  = 0.5000*noise( p ); p = m*p*2.02;
+    f += 0.2500*noise( p ); p = m*p*2.03;
+    f += 0.12500*noise( p ); p = m*p*2.01;
+    f += 0.06250*noise( p );
+    return f;
+}
+/////////////////////////////////////
+
+float stepUp(float t, float len, float smo)
+{
+  float tt = mod(t += smo, len);
+  float stp = floor(t / len) - 1.0;
+  return smoothstep(0.0, smo, tt) + stp;
 }
 
-//// sdf box
-float sdBox(vec3 p, vec3 b)
+// iq's smin
+float smin( float d1, float d2, float k ) {
+    float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
+    return mix( d2, d1, h ) - k*h*(1.0-h); }
+
+float sdTorus( vec3 p, vec2 t )
 {
-    vec3 d = abs(p) - b;
-    return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
+  vec2 q = vec2(length(p.xz)-t.x,p.y);
+  return length(q)-t.y;
 }
 
-/////////////////////////////////////////////////////
-//// color and density calculation from volume data
-/////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////////
-//// Step 1: calculate color and density from sdf
-//// You are asked to convert the negative sdf value to a vec4 with the first three components as color rgb values and the last component as density.
-//// For color, you may use the provided palette function to convert the sdf value to an rgb color.
-//// For density, we assume it is alway 1.0 inside the object (sdf < 0) and 0.0 outside the object (sdf >= 0).
-/////////////////////////////////////////////////////
-
-vec4 readSDFVolume(vec3 p)
+float map( in vec3 p )
 {
-    //// sdf object
-    float distance = sdSphere(p, 1.0); 
-
-    //// convert sdf value to a color
-
-    //// your implementation starts
-
-    return vec4(0.0, 0.0, 0.0, 0.0);
-
-    //// your implementation ends
+	vec3 q = p - vec3(0.0,0.5,1.0)*iTime;
+    float f = fbm(q);
+    float s1 = 1.0 - length(p * vec3(0.5, 1.0, 0.5)) + f * 2.2;
+    float s2 = 1.0 - length(p * vec3(0.1, 1.0, 0.2)) + f * 2.5;
+    float torus = 1. - sdTorus(p * 2.0, vec2(6.0, 0.005)) + f * 3.5;
+    float s3 = 1.0 - smin(smin(
+                           length(p * 1.0 - vec3(cos(iTime * 3.0) * 6.0, sin(iTime * 2.0) * 5.0, 0.0)),
+                           length(p * 2.0 - vec3(0.0, sin(iTime) * 4.0, cos(iTime * 2.0) * 3.0)), 4.0),
+                           length(p * 3.0 - vec3(cos(iTime * 2.0) * 3.0, 0.0, sin(iTime * 3.3) * 7.0)), 4.0) + f * 2.5;
+    
+    float t = mod(stepUp(iTime, 4.0, 1.0), 4.0);
+    
+	float d = mix(s1, s2, clamp(t, 0.0, 1.0));
+    d = mix(d, torus, clamp(t - 1.0, 0.0, 1.0));
+    d = mix(d, s3, clamp(t - 2.0, 0.0, 1.0));
+    d = mix(d, s1, clamp(t - 3.0, 0.0, 1.0));
+    
+	return min(max(0.0, d), 1.0);
 }
 
-/////////////////////////////////////////////////////
-//// Step 2: calculate color and density from CT data
-//// You are asked to convert the CT data to a vec4 with the first three components as color rgb values and the last component as density.
-//// For density, you should read the density value from the first component of the volumetric texture iVolume with tex_coord.
-//// For color, you should use the provided palette function to convert the density value to an rgb color.
-//// You may want to multiple the returned vec4 with a constant to enhance the visualization color.
-/////////////////////////////////////////////////////
+float jitter;
 
-vec4 readCTVolume(vec3 p)
+#define MAX_STEPS 48
+#define SHADOW_STEPS 8
+#define VOLUME_LENGTH 15.
+#define SHADOW_LENGTH 2.
+
+// Reference
+// https://shaderbits.com/blog/creating-volumetric-ray-marcher
+vec4 cloudMarch(vec3 p, vec3 ray)
 {
-    //// normalize coordinates to [0, 1] range
-    vec3 tex_coord = (p + vec3(1.0)) * 0.5;
-    //// check if tex_coord is outside the box
-    if (tex_coord.x < 0.0 || tex_coord.x > 1.0 || 
-        tex_coord.y < 0.0 || tex_coord.y > 1.0 || 
-        tex_coord.z < 0.0 || tex_coord.z > 1.0) {
-        return vec4(0.0);
+    float density = 0.;
+
+    float stepLength = VOLUME_LENGTH / float(MAX_STEPS);
+    float shadowStepLength = SHADOW_LENGTH / float(SHADOW_STEPS);
+    vec3 light = normalize(vec3(1.0, 2.0, 1.0));
+
+    vec4 sum = vec4(0., 0., 0., 1.);
+    
+    vec3 pos = p + ray * jitter * stepLength;
+    
+    for (int i = 0; i < MAX_STEPS; i++)
+    {
+        if (sum.a < 0.1) {
+        	break;
+        }
+        float d = map(pos);
+    
+        if( d > 0.001)
+        {
+            vec3 lpos = pos + light * jitter * shadowStepLength;
+            float shadow = 0.;
+    
+            for (int s = 0; s < SHADOW_STEPS; s++)
+            {
+                lpos += light * shadowStepLength;
+                float lsample = map(lpos);
+                shadow += lsample;
+            }
+    
+            density = clamp((d / float(MAX_STEPS)) * 20.0, 0.0, 1.0);
+            float s = exp((-shadow / float(SHADOW_STEPS)) * 3.);
+            sum.rgb += vec3(s * density) * vec3(1.1, 0.9, .5) * sum.a;
+            sum.a *= 1.-density;
+
+            sum.rgb += exp(-map(pos + vec3(0,0.25,0.0)) * .2) * density * vec3(0.15, 0.45, 1.1) * sum.a;
+        }
+        pos += ray * stepLength;
     }
 
-    //// your implementation starts
-
-    return vec4(0.0, 0.0, 0.0, 0.0);
-
-    //// your implementation ends
+    return sum;
 }
 
-/////////////////////////////////////////////////////
-//// Step 3: ray tracing with volumetric data
-//// You are asked to implement the front-to-back volumetric ray tracing algorithm to accummulate colors along each ray. 
-//// Your task is to accumulate color and transmittance along the ray based on the absorption-emission volumetric model.
-//// You may want to read the course slides, Equation (3) in the original NeRF paper, and the A2a document for the rendering model.
-/////////////////////////////////////////////////////
-
-//// ro - ray origin, rd - ray direction, 
-//// near - near bound of t, far - far bound of t, 
-//// n_samples - number of samples between near and far
-vec4 volumeRendering(vec3 ro, vec3 rd, float near, float far, int n_samples) 
+mat3 camera(vec3 ro, vec3 ta, float cr )
 {
-    float stepSize = (far - near) / float(n_samples);                           //// step size of each sample
-
-    //// color and transmittance
-    vec3 color = vec3(0.0);                                                     //// accumulated color
-    float transmittance = 1.0;                                                  //// transmittance
-
-    //// ray marching loop
-    for (int i = 0; i < n_samples; i++) {
-        float t = near + stepSize * float(i);                                   //// t value along the ray
-        vec3 p = ro + t * rd;                                                   //// sample position on the ray
-
-        //// your implementation starts
-
-
-        //// your implementation ends
-
-        //// early termination if opacity is high
-        if (transmittance < 0.01) break;
-    }
-    
-    //// return color and transmittance
-    return vec4(color, 1.0 - transmittance);                                   
+	vec3 cw = normalize(ta - ro);
+	vec3 cp = vec3(sin(cr), cos(cr),0.);
+	vec3 cu = normalize( cross(cw,cp) );
+	vec3 cv = normalize( cross(cu,cw) );
+    return mat3( cu, cv, cw );
 }
 
-
-void mainImage(out vec4 fragColor, in vec2 fragCoord)
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-    //// normalize fragment coordinates to [-0.5, 0.5] range
-    vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;
+    vec2 p = (fragCoord.xy * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
+    jitter = hash(p.x + p.y * 57.0 + iTime);
+    vec3 ro = vec3(cos(iTime * .333) * 8.0, -5.5, sin(iTime * .333) * 8.0);
+    vec3 ta = vec3(0.0, 1., 0.0);
+    mat3 c = camera(ro, ta, 0.0);
+    vec3 ray = c * normalize(vec3(p, 1.75));
+    vec4 col = cloudMarch(ro, ray);
+    vec3 result = col.rgb + mix(vec3(0.3, 0.6, 1.0), vec3(0.05, 0.35, 1.0), p.y + 0.75) * (col.a);
+    
+    float sundot = clamp(dot(ray,normalize(vec3(1.0, 2.0, 1.0))),0.0,1.0);
+    result += 0.4*vec3(1.0,0.7,0.3)*pow( sundot, 4.0 );
 
-    //// camera 
-    float angle = 0.5 * iTime;                                                  //// camera angle
-    vec3 ta = vec3(0.0, 0.0, 0.0);                                              //// object center
-    float radius = 5.5;                                                         //// camera rotation
-    float height = 2.2;                                                         //// camera height
-    vec3 ro = ta + vec3(radius * cos(angle), height, radius * sin(angle));      //// camera position
-    mat3 ca = setCamera(ro, ta, 0.0);                                           //// camera matrix
+    result = pow(result, vec3(1.0/2.2));
     
-    //// ray
-    vec3 rd = ca * normalize(vec3(uv, 1.0));                                    //// ray direction
-    float near = 2.0;                                                           //// near bound
-    float far = 8.5;                                                            //// far bound    
-    int n_samples = 256;                                                        //// number of samples along each ray
-    
-    //// final output color
-    fragColor = volumeRendering(ro, rd, near, far, n_samples);                  //// volumetric ray marching
+    fragColor = vec4(result,1.0);
 }
 
-void main()
-{
-    mainImage(gl_FragColor, gl_FragCoord.xy);
+void main() {
+    vec4 fragColor;
+    mainImage(fragColor, vUv * iResolution.xy);
+    gl_FragColor = fragColor;
 }

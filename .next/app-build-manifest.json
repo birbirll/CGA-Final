@@ -25,6 +25,21 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(assignment)/assignment/A1a/page.js"
+    ],
+    "/(assignment)/assignment/A1a_doc/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(assignment)/assignment/A1a_doc/page.js"
+    ],
+    "/(assignment)/assignment/A2a/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(assignment)/assignment/A2a/page.js"
+    ],
+    "/(assignment)/assignment/A2a_doc/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(assignment)/assignment/A2a_doc/page.js"
     ]
   }
 }
