@@ -21,10 +21,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(assignment)/assignment/layout.js"
     ],
-    "/_not-found/page": [
+    "/(assignment)/assignment/A1a/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/(assignment)/assignment/A1a/page.js"
     ]
   }
 }
