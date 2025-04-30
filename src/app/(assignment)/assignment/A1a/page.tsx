@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import FPSStats from 'react-fps-stats'; // npm install react-fps-stats
 
 import vertexShader from '@/shaders/common/vertex.glsl';
-import fragmentShader from './fragment_final.glsl';
+import fragmentShader from './fragment_snow.glsl';
 import useDevicePixelRatio from '@/hooks/useDevicePixelRatio';
 
 const Test = () => {

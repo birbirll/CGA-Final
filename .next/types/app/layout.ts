@@ -1,4 +1,4 @@
-// File: /Users/bir/code/cgai_final/CGA-Final/src/app/layout.tsx
+// File: /Users/sunnylyx/Library/Mobile Documents/com~apple~CloudDocs/Documents/Spring2025/CGA-Final/src/app/layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

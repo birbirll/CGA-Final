@@ -1,4 +1,4 @@
-// File: /Users/bir/code/cgai_final/CGA-Final/src/app/(assignment)/assignment/A1a/page.tsx
+// File: /Users/sunnylyx/Library/Mobile Documents/com~apple~CloudDocs/Documents/Spring2025/CGA-Final/src/app/(assignment)/assignment/A1a/page.tsx
 import * as entry from '../../../../../../src/app/(assignment)/assignment/A1a/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

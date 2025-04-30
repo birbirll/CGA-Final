@@ -1,55 +1,30 @@
 {
   "pages": {
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/(assignment)/assignment/A4/page": [
+    "/(assignment)/assignment/Final_doc/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(assignment)/assignment/A4/page.js"
+      "static/chunks/app/(assignment)/assignment/Final_doc/page.js"
     ],
     "/(assignment)/assignment/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(assignment)/assignment/layout.js"
     ],
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
+    ],
     "/(assignment)/assignment/A1a/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(assignment)/assignment/A1a/page.js"
-    ],
-    "/(assignment)/assignment/A1a_doc/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(assignment)/assignment/A1a_doc/page.js"
-    ],
-    "/(assignment)/assignment/A2a/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(assignment)/assignment/A2a/page.js"
-    ],
-    "/(assignment)/assignment/A2a_doc/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(assignment)/assignment/A2a_doc/page.js"
-    ],
-    "/(tutorial)/tutorial/shader-basis/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(tutorial)/tutorial/shader-basis/page.js"
-    ],
-    "/(tutorial)/tutorial/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(tutorial)/tutorial/layout.js"
     ]
   }
 }
