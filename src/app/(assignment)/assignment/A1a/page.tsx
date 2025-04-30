@@ -3,9 +3,10 @@
 import { Suspense, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import FPSStats from 'react-fps-stats'; // npm install react-fps-stats
 
 import vertexShader from '@/shaders/common/vertex.glsl';
-import fragmentShader from './fragment_water.glsl';
+import fragmentShader from './fragment_final.glsl';
 import useDevicePixelRatio from '@/hooks/useDevicePixelRatio';
 
 const Test = () => {
@@ -38,21 +39,24 @@ const Test = () => {
 export default function TestPage() {
   const dpr = useDevicePixelRatio();
   return (
-    <Canvas
-      orthographic
-      // dpr={1}
-      camera={{ position: [0, 0, 6] }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-      }}
-    >
-      <Suspense fallback={null}>
-        <Test />
-      </Suspense>
-    </Canvas>
+    <>
+      <FPSStats />
+      <Canvas
+        orthographic
+        // dpr={1}
+        camera={{ position: [0, 0, 6] }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+        }}
+      >
+        <Suspense fallback={null}>
+          <Test />
+        </Suspense>
+      </Canvas>
+    </>
   );
 }
